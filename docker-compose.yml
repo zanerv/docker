@@ -298,12 +298,10 @@ services:
     # LAN hostnames for other docker containers using jwilder
       - 'farafir:192.168.3.2'
       - 'farafir1:192.168.3.3'
-      - 'unifi unifi.${DOMAIN}:${IP}'
       - 'shiny shiny.${DOMAIN}:${IP}'
       - 'sickrage sickrage.${DOMAIN}:${IP}'
       - 'couchpotato couchpotato.${DOMAIN}:${IP}'
       - 'transmission transmission.${DOMAIN}:${IP}'
-     # - 'plexpy plexpy.${DOMAIN}:${IP}'
       - 'plex plex.${DOMAIN}:${IP}'
       - 'grafana grafana.${DOMAIN}:${IP}'
       - 'influxdb influxdb.${DOMAIN}:${IP}'
