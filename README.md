@@ -22,7 +22,7 @@
 - letsencrypt-companion: Free SSL/TLS Certificates - https://letsencrypt.org
 
 # Home Assistant
-- firetv: Monitor/Control Amazon Fire TV device - https://github.com/happyleavesaoc/python-firetv
+- firetv: Monitor & Control Amazon Fire TV device - https://github.com/happyleavesaoc/python-firetv
 - mqtt: Lightweight messaging protocol - http://mqtt.org
 - hass: Home Assistant, home automation platform - https://www.home-assistant.io
 
@@ -34,3 +34,7 @@
 
 - storj: Decentralized cloud storage - https://storj.io
 
+# Scripts for Storj
+
+- daemon_check.sh: Monitor storj daemon & restart it if necessary
+- mem_usage.sh: Monitor RAM usage & restart containers on threshold 
