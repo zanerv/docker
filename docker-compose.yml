@@ -1,52 +1,108 @@
 ---
 version: '2'
+volumes:
+  nextcloud:
+networks:
+  proxy-tier:
+
 services:
-  storj0:
-    image: madcatsu/storjshare-multi-daemon
-    container_name: storj0
-    hostname: storj0
-    restart: unless-stopped
+
+  firetv:
+    image: firetv
+    build: /opt/appdata/firetv/Dockerfile
+    container_name: firetv
+    hostname: firetv
+    depends_on:
+      - hass
+    ports:
+     - "5556:5556"
     volumes:
+      - /opt/appdata/firetv/config:/config
+
+  tautulli:
+    image: tautulli/tautulli
+    container_name: tautulli
+    hostname: tautulli
+    ports:
+     - 8181:8181
+    environment:
+      - VIRTUAL_HOST=tautulli.${DOMAIN}
+      - VIRTUAL_PORT=8181
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - /opt/appdata/tautulli/logs:/logs
+      - /opt/appdata/tautulli/config:/config
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
-      - /media/Cloud/storj:/data
-      - /opt/appdata/storj/configs:/config
-      - /opt/appdata/storj/log:/logs
-    command: --create-user abc:1001:1001
-    environment:
-      - ENABLE_DASHBOARD="true"
-      - DASHBOARD_USER_EMAIL="mihai.tutuleasa@protonmail.com"
-      - DASHBOARD_USER_SECRET="w39SEJGat9pq"
-    ports:
-      - 4000:4000
-      - 4001:4001
-      - 4002:4002
-      - 4003:4003
-      - 4004:4004
+    networks:
+      - proxy-tier
+      - default
 
-  storj1:
-    image: madcatsu/storjshare-multi-daemon
-    container_name: storj1
-    hostname: storj1
-    restart: unless-stopped
+  smokeping:
+    image: linuxserver/smokeping
+    container_name: smokeping
+    hostname: smokeping
+    ports:
+     - 8800:80
+    environment:
+      - VIRTUAL_HOST=smokeping.${DOMAIN}
+      - VIRTUAL_PORT=8800
+      - PUID=${PUID}
+      - PGID=${PGID}
     volumes:
+      # - /opt/appdata/smokeping/resolv.conf:/etc/resolv.conf:ro
+      - /opt/appdata/smokeping/data:/data
+      - /opt/appdata/smokeping/config:/config
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
-      - /mnt/storj1:/data
-      - /opt/appdata/storj1/configs:/config
-      - /opt/appdata/storj/log:/logs
-    command: --create-user abc:1001:1001
-    environment:
-      - ENABLE_DASHBOARD="true"
-      - DASHBOARD_USER_EMAIL="mihai.tutuleasa@protonmail.com"
-      - DASHBOARD_USER_SECRET="w39SEJGat9pq"
-    ports:
-      - 4010:4010
-      - 4011:4011
-      - 4012:4012
-      - 4013:4013
-      - 4014:4014
+    networks:
+      - proxy-tier
+      - default
 
+  influxdb:
+    image: influxdb
+    container_name: influxdb
+    hostname: influxdb
+    ports:
+      - "8086:8086"
+      - "25826:25826/udp"
+    volumes:
+      - /opt/appdata/influxdb:/var/lib/influxdb
+      - /opt/appdata/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - /opt/appdata/collectd/types.db:/usr/share/collectd/types.db:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+    networks:
+      - default
+      
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    hostname: grafana
+    user: "1001"
+    depends_on:
+      - influxdb
+    ports:
+      - "3000:3000"
+    environment:
+      - VIRTUAL_HOST=grafana.${DOMAIN}
+      - VIRTUAL_PORT=3000
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=${DOMAIN}:25
+      - GF_SMTP_FROM_ADDRESS=${EMAIL}
+      - GF_SMTP_USER=${EMAIL}
+      - GF_SMTP_PASSWORD=${EMAIL_PASS}
+      - GF_SMTP_SKIP_VERIFY=true
+    volumes:
+      - /opt/appdata/grafana/plugins:/var/lib/grafana/plugins
+      - /opt/appdata/grafana:/var/lib/grafana
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+    networks:
+      - proxy-tier
+      - default
+  
   plex:
     image: plexinc/pms-docker
     container_name: plex
@@ -75,6 +131,9 @@ services:
       - 32414:32414/udp
     restart: always
     environment:
+      - VIRTUAL_HOST=plex.${DOMAIN}
+      - VIRTUAL_PORT=32400
+      - LETSENCRYPT_HOST=plex.${DOMAIN}
       - ADVERTISE_IP=http://${IP}:32400/
       - PLEX_CLAIM="nope"
       - PLEX_UID=${PUID}
@@ -82,28 +141,6 @@ services:
     networks:
       - proxy-tier
       - default
-
-#  plexpy:
-#    image: linuxserver/plexpy
-#    container_name: plexpy
-#    depends_on:
-#      - plex
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - /dev/rtc:/dev/rtc:ro
-#      - /opt/appdata/plexpy:/config
-#      - /opt/appdata/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro
-#    ports:
-#      - 8181:8181
-#    restart: always
-#    environment:
-#      - PUID=${PUID}
-#      - PGID=${PGID}
-#      - VIRTUAL_HOST=plexpy.${DOMAIN}
-#      - VIRTUAL_PORT=8181
-#    networks:
-#      - proxy-tier
-#      - default
 
   transmission:
     image: linuxserver/transmission
@@ -178,7 +215,7 @@ services:
     image: portainer/portainer
     container_name: portainer
     ports:
-      - 9090:9000
+      - 9099:9000
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -194,17 +231,6 @@ services:
     networks:
       - proxy-tier
       - default
-#
-#  watchtower:
-#    image: centurylink/watchtower
-#v2tec/watchtower
-#    container_name: watchtower
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock
-#      - /etc/localtime:/etc/localtime:ro
-#      - /dev/rtc:/dev/rtc:ro
-#      - /opt/appdata/watchtower/config.json:/config.json
-#    command: --debug --interval 3600
 
   openvpn:
     cap_add:
@@ -219,25 +245,26 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
 
-#  organizr:
-#    image: lsiocommunity/organizr
-#    container_name: organizr
-#    ports:
-#      - 8080:80
-#    environment:
-#      - PUID=${PUID}
-#      - PGID=${PGID}
-#      - VIRTUAL_HOST=meh.${DOMAIN}
-#      - VIRTUAL_PORT=80
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - /dev/rtc:/dev/rtc:ro
-#      - /opt/appdata/organizr:/config
-#    restart:
-#      always
-#    networks:
-#      - proxy-tier
-#      - default
+  proxy:
+    image: jwilder/nginx-proxy:alpine
+    container_name: proxy
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    volumes:
+      - /opt/appdata/proxy/certs:/etc/nginx/certs:ro
+      - /opt/appdata/proxy/conf.d:/etc/nginx/conf.d
+      - /opt/appdata/proxy/vhost.d:/etc/nginx/vhost.d
+      - /opt/appdata/proxy/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    environment:
+      - DEFAULT_HOST=pihole.${DOMAIN}
+    networks:
+      proxy-tier:
+        ipv4_address: 172.19.0.4
 
 ###Pi Hole###
   pihole:
@@ -247,10 +274,13 @@ services:
     ports:
      - "${IP}:53:53/tcp"
      - "${IP}:53:53/udp"
-     - 8053:80
+    # - '53:53/tcp'
+    # - '53:53/udp'
+     - '8053:80/tcp'
     volumes:
       - /var/log/pihole.log:/var/log/pihole.log
       - /opt/appdata/pihole:/etc/pihole
+      # - /opt/appdata/pihole/hosts:/etc/hosts
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
   #net: host
@@ -266,18 +296,24 @@ services:
     # Resolve to nothing domains (terminate connection)
       - 'nw2master.bioware.com nwn2.master.gamespy.com:0.0.0.0'
     # LAN hostnames for other docker containers using jwilder
+      - 'farafir:192.168.3.2'
+      - 'farafir1:192.168.3.3'
+      - 'unifi unifi.${DOMAIN}:${IP}'
+      - 'shiny shiny.${DOMAIN}:${IP}'
       - 'sickrage sickrage.${DOMAIN}:${IP}'
       - 'couchpotato couchpotato.${DOMAIN}:${IP}'
       - 'transmission transmission.${DOMAIN}:${IP}'
-      #- 'plexpy plexpy.${DOMAIN}:${IP}'
+     # - 'plexpy plexpy.${DOMAIN}:${IP}'
       - 'plex plex.${DOMAIN}:${IP}'
+      - 'grafana grafana.${DOMAIN}:${IP}'
+      - 'influxdb influxdb.${DOMAIN}:${IP}'
       - 'z z.${DOMAIN}:${IP}'
       - 'portainer portainer.${DOMAIN}:${IP}'
-      - 'pihole pihole.${DOMAIN}:${IP}'
-     # - 'organizr meh.${DOMAIN}:${IP}'
+      - "pihole pihole.${DOMAIN}:${IP}"
+      - 'smokeping smokeping.${DOMAIN}:${IP}'
+      - 'tautulli tautulli.${DOMAIN}:${IP}'
       - 'hass hass.${DOMAIN}:${IP}'
       - 'obama obama.${DOMAIN}:192.168.3.1'
-      # - 'wordpress wordpress.yourDomain.lan:192.168.41.55'
     restart: always
     networks:
       - proxy-tier
@@ -296,11 +332,14 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+     - "3306:3306/tcp"
 
   redis:
     image: redis
     container_name: redis
     restart: always
+# && php /var/www/html/occ preview:pre-generate
 
   cron:
     container_name: cron
@@ -316,7 +355,7 @@ services:
           sleep 1
         done
         while true; do
-          php -f /var/www/html/cron.php
+          php -f /var/www/html/cron.php && php /var/www/html/occ preview:pre-generate
           sleep 15m
         done
       EOF'
@@ -330,6 +369,7 @@ services:
     restart: always
     volumes:
       - nextcloud:/var/www/html
+#      - /opt/appdata/nextcloud/.user.ini:/var/www/html/.user.ini
       - /opt/appdata/nextcloud/config:/var/www/html/config/
       - /opt/appdata/nextcloud/custom_apps:/var/www/html/custom_apps
       - /opt/appdata/nextcloud/data:/var/www/html/data
@@ -355,32 +395,12 @@ services:
     environment:
       - VIRTUAL_HOST=z.${DOMAIN}
       - LETSENCRYPT_HOST=z.${DOMAIN}
-      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+#      - LETSENCRYPT_EMAIL=${EMAIL}
     depends_on:
       - nextcloud
     networks:
       - proxy-tier
       - default
-
-  proxy:
-    image: jwilder/nginx-proxy:alpine
-    container_name: proxy
-    restart: always
-    ports:
-      - 80:80
-      - 443:443
-    labels:
-      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
-    volumes:
-      - /opt/appdata/proxy/certs:/etc/nginx/certs:ro
-      - /opt/appdata/proxy/conf.d:/etc/nginx/conf.d
-      - /opt/appdata/proxy/vhost.d:/etc/nginx/vhost.d
-      - /opt/appdata/proxy/html:/usr/share/nginx/html
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-    environment:
-      - DEFAULT_HOST=pihole.${DOMAIN}
-    networks:
-      - proxy-tier
 
   letsencrypt-companion:
     container_name: letsencrypt
@@ -420,15 +440,88 @@ services:
     ports:
       - 8123:8123/tcp
     restart: always
-#    environment:
-#      - VIRTUAL_HOST=hass.${DOMAIN}
-#      - VIRTUAL_PORT=8123
     network_mode: host
+    depends_on:
+      - mqtt
+      - db
+
+  # collectd:
+    # image: fr3nd/collectd
+    # container_name: collectd
+    # hostname: collectd
+    # privileged: true
+    # network_mode: host
+    # volumes:
+      # - /proc:/mnt/proc:ro
+      # - /opt/appdata/collectd:/etc/collectd:ro
+
+  # duplicati:
+    # image: linuxserver/duplicati
+    # container_name: duplicati
+    # hostname: duplicati
+    # ports:
+     # - 8200:8200
+    # environment:
+      # - VIRTUAL_HOST=duplicati.${DOMAIN}
+      # - VIRTUAL_PORT=8200
+      # - PUID=33
+      # - PGID=33
+    # volumes:
+      # - /opt:/opt
+      # - /mnt/storj/backups:/backups
+      # - /opt/appdata/duplicati:/config
+      # - /etc/localtime:/etc/localtime:ro
+      # - /dev/rtc:/dev/rtc:ro
+    # networks:
+      # - proxy-tier
+      # - default
+
+
+  # chronograf:
+    # image: chronograf
+    # container_name: chronograf
+    # hostname: chronograf
+    # volumes:
+      # - /opt/appdata/chronograf:/var/lib/chronograf
+    # environment:
+      # - VIRTUAL_HOST=chronograf.${DOMAIN}
+      # - VIRTUAL_PORT=8888
+    # ports:
+      # - "8888:8888"
+    # links:
+      # - influxdb
+    # networks:
+      # - proxy-tier
+      # - default
+
+#  organizr:
+#    image: lsiocommunity/organizr
+#    container_name: organizr
+#    ports:
+#      - 8080:80
+#    environment:
+#      - PUID=${PUID}
+#      - PGID=${PGID}
+#      - VIRTUAL_HOST=meh.${DOMAIN}
+#      - VIRTUAL_PORT=80
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - /dev/rtc:/dev/rtc:ro
+#      - /opt/appdata/organizr:/config
+#    restart:
+#      always
 #    networks:
 #      - proxy-tier
 #      - default
 
-volumes:
-  nextcloud:
-networks:
-  proxy-tier:
+#
+#  watchtower:
+#    image: centurylink/watchtower
+#v2tec/watchtower
+#    container_name: watchtower
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#      - /etc/localtime:/etc/localtime:ro
+#      - /dev/rtc:/dev/rtc:ro
+#      - /opt/appdata/watchtower/config.json:/config.json
+#    command: --debug --interval 3600

@@ -1,0 +1,402 @@
+---
+version: '2'
+networks:
+  storj:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.0.0.0/16
+         gateway: 10.0.0.1
+
+services:
+
+  storj1:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj1
+    hostname: storj1
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S2WB/storj1:/data
+      - /opt/appdata/storj/1:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4001:4001
+    networks:
+      storj:
+        ipv4_address: 10.0.1.1
+
+  storj2:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj2
+    hostname: storj2
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S2WB/storj2:/data
+      - /opt/appdata/storj/2:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4002:4002
+    networks:
+      storj:
+        ipv4_address: 10.0.1.2
+
+  storj3:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj3
+    hostname: storj3
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S8SA/storj3:/data
+      - /opt/appdata/storj/3:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4003:4003
+    networks:
+      storj:
+        ipv4_address: 10.0.1.3
+
+  storj4:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj4
+    hostname: storj4
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S2WM/storj4:/data
+      - /opt/appdata/storj/4:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4004:4004
+    networks:
+      storj:
+        ipv4_address: 10.0.1.4
+
+  storj5:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj5
+    hostname: storj5
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S1SS/storj5:/data
+      - /opt/appdata/storj/5:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4005:4005
+    networks:
+      storj:
+        ipv4_address: 10.0.1.5
+
+  storj6:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj6
+    hostname: storj6
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S2WM/storj6:/data
+      - /opt/appdata/storj/6:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4006:4006
+    networks:
+      storj:
+        ipv4_address: 10.0.1.6
+
+  storj7:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj7
+    hostname: storj7
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /media/storj7:/data
+      - /opt/appdata/storj/7:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4007:4007
+    networks:
+      storj:
+        ipv4_address: 10.0.1.7
+
+  storj8:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj8
+    hostname: storj8
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S2WB/storj8:/data
+      - /opt/appdata/storj/8:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4008:4008
+    networks:
+      storj:
+        ipv4_address: 10.0.1.8
+
+  storj9:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj9
+    hostname: storj9
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S8SA/storj9:/data
+      - /opt/appdata/storj/9:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4009:4009
+    networks:
+      storj:
+        ipv4_address: 10.0.1.9
+
+  storj10:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj10
+    hostname: storj10
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S2WM/storj10:/data
+      - /opt/appdata/storj/10:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4010:4010
+    networks:
+      storj:
+        ipv4_address: 10.0.1.10
+
+  storj11:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj11
+    hostname: storj11
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S3HB/storj11:/data
+      - /opt/appdata/storj/11:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4011:4011
+    networks:
+      storj:
+        ipv4_address: 10.0.1.11
+
+  storj12:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj12
+    hostname: storj12
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S3HB/storj12:/data
+      - /opt/appdata/storj/12:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4012:4012
+    networks:
+      storj:
+        ipv4_address: 10.0.1.12
+
+  storj13:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj13
+    hostname: storj13
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/storj13:/data
+      - /opt/appdata/storj/13:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4013:4013
+    networks:
+      storj:
+        ipv4_address: 10.0.1.13
+
+  storj14:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj14
+    hostname: storj14
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S3HB/storj14:/data
+      - /opt/appdata/storj/14:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4014:4014
+    networks:
+      storj:
+        ipv4_address: 10.0.1.14
+
+  storj15:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj15
+    hostname: storj15
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S3HB/storj15:/data
+      - /opt/appdata/storj/15:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4015:4015
+    networks:
+      storj:
+        ipv4_address: 10.0.1.15
+
+  storj16:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj16
+    hostname: storj16
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S2WB/storj16:/data
+      - /opt/appdata/storj/16:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4016:4016
+    networks:
+      storj:
+        ipv4_address: 10.0.1.16
+
+  storj17:
+    image: madcatsu/storjshare-multi-daemon
+    mem_limit: 2g
+    container_name: storj17
+    hostname: storj17
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /mnt/S2WM/storj17:/data
+      - /opt/appdata/storj/17:/config
+      - /opt/appdata/storj/log:/logs
+      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+    command: --create-user abc:1001:1001
+    env_file:
+     - ./storj.env
+    ports:
+      - 4017:4017
+    networks:
+      storj:
+        ipv4_address: 10.0.1.17
