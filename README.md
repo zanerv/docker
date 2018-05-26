@@ -1,4 +1,4 @@
-# docker-compose - List of services
+# docker-compose.yml - List of services
 
 # Media Center
 - plex: Plex Media Server - https://www.plex.tv
@@ -30,4 +30,7 @@
 - openvpn: Open Source VPN Server - https://openvpn.net
 - pihole: Network Ad Blocker - https://pi-hole.net
 
+# storj.yml
+
+- storj: Decentralized cloud storage - https://storj.io
 
