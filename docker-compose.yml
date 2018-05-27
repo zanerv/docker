@@ -8,8 +8,8 @@ networks:
 services:
 
   firetv:
-    image: marvambass/firetv-server
-#    build: /opt/appdata/firetv/Dockerfile
+    image: firetv
+    build: /opt/appdata/firetv/Dockerfile
     container_name: firetv
     hostname: firetv
     restart: always
