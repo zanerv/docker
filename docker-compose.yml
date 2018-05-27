@@ -84,10 +84,10 @@ services:
     depends_on:
       - influxdb
     ports:
-      - "3000:3000"
+      - "3030:3000"
     environment:
       - VIRTUAL_HOST=grafana.${DOMAIN}
-      - VIRTUAL_PORT=3000
+      - VIRTUAL_PORT=3030
       - GF_SMTP_ENABLED=true
       - GF_SMTP_HOST=${DOMAIN}:25
       - GF_SMTP_FROM_ADDRESS=${EMAIL}
@@ -215,12 +215,12 @@ services:
     image: portainer/portainer
     container_name: portainer
     ports:
-      - 9099:9000
+      - 999:9000
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - VIRTUAL_HOST=portainer.${DOMAIN}
-      - VIRTUAL_PORT=9000
+      - VIRTUAL_PORT=999
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
