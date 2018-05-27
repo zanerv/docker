@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in $(docker ps|awk '{print $13}'|grep storj|tr -d storj)
+for i in $(docker ps --format '{{.Names}}'|grep storj|tr -d storj)
 
      do
 
