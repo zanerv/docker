@@ -24,7 +24,7 @@ services:
     container_name: tautulli
     hostname: tautulli
     ports:
-     - 8181:8181
+     - 8181
     environment:
       - VIRTUAL_HOST=tautulli.${DOMAIN}
       - VIRTUAL_PORT=8181
@@ -44,10 +44,10 @@ services:
     container_name: smokeping
     hostname: smokeping
     ports:
-     - 8800:80
+     - 80
     environment:
       - VIRTUAL_HOST=smokeping.${DOMAIN}
-      - VIRTUAL_PORT=8800
+      - VIRTUAL_PORT=80
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
@@ -84,10 +84,10 @@ services:
     depends_on:
       - influxdb
     ports:
-      - "3030:3000"
+      - 3000
     environment:
       - VIRTUAL_HOST=grafana.${DOMAIN}
-      - VIRTUAL_PORT=3030
+      - VIRTUAL_PORT=3000
       - GF_SMTP_ENABLED=true
       - GF_SMTP_HOST=${DOMAIN}:25
       - GF_SMTP_FROM_ADDRESS=${EMAIL}
@@ -215,12 +215,12 @@ services:
     image: portainer/portainer
     container_name: portainer
     ports:
-      - 999:9000
+      - 9000
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - VIRTUAL_HOST=portainer.${DOMAIN}
-      - VIRTUAL_PORT=999
+      - VIRTUAL_PORT=9000
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
