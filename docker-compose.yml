@@ -8,10 +8,11 @@ networks:
 services:
 
   firetv:
-    image: firetv
-    build: /opt/appdata/firetv/Dockerfile
+    image: marvambass/firetv-server
+#    build: /opt/appdata/firetv/Dockerfile
     container_name: firetv
     hostname: firetv
+    restart: always
     depends_on:
       - hass
     ports:
@@ -64,6 +65,7 @@ services:
     image: influxdb
     container_name: influxdb
     hostname: influxdb
+    restart: always
     ports:
       - "8086:8086"
       - "25826:25826/udp"
@@ -81,6 +83,7 @@ services:
     container_name: grafana
     hostname: grafana
     user: "1001"
+    restart: always
     depends_on:
       - influxdb
     ports:
@@ -106,6 +109,7 @@ services:
   plex:
     image: plexinc/pms-docker
     container_name: plex
+    hostname: plex
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
@@ -145,6 +149,7 @@ services:
   transmission:
     image: linuxserver/transmission
     container_name: transmission
+    hostname: transmission
     ports:
       - 9091:9091
       - 51413:51413
@@ -166,6 +171,7 @@ services:
   couchpotato:
     image: linuxserver/couchpotato
     container_name: couchpotato
+    hostname: couchpotato
     depends_on:
       - transmission
     volumes:
@@ -190,6 +196,7 @@ services:
   sickrage:
     image: linuxserver/sickrage
     container_name: sickrage
+    hostname: sickrage
     ports:
     - 8081:8081
     environment:
@@ -214,6 +221,7 @@ services:
   portainer:
     image: portainer/portainer
     container_name: portainer
+    hostname: portainer
     ports:
       - 9000
     environment:
@@ -237,6 +245,7 @@ services:
      - NET_ADMIN
     image: kylemanna/openvpn
     container_name: openvpn
+    hostname: openvpn
     ports:
      - "1194:1194/udp"
     restart: always
@@ -248,6 +257,7 @@ services:
   proxy:
     image: jwilder/nginx-proxy:alpine
     container_name: proxy
+    hostname: proxy
     restart: always
     ports:
       - 80:80
@@ -296,9 +306,6 @@ services:
     # Resolve to nothing domains (terminate connection)
       - 'nw2master.bioware.com nwn2.master.gamespy.com:0.0.0.0'
     # LAN hostnames for other docker containers using jwilder
-      - 'farafir:192.168.3.2'
-      - 'farafir1:192.168.3.3'
-      - 'shiny shiny.${DOMAIN}:${IP}'
       - 'sickrage sickrage.${DOMAIN}:${IP}'
       - 'couchpotato couchpotato.${DOMAIN}:${IP}'
       - 'transmission transmission.${DOMAIN}:${IP}'
@@ -321,6 +328,7 @@ services:
   db:
     image: mariadb
     container_name: mariadb
+    hostname: mariadb
     restart: always
     volumes:
       - /opt/appdata/db:/var/lib/mysql
@@ -336,12 +344,14 @@ services:
   redis:
     image: redis
     container_name: redis
+    hostname: redis
     restart: always
 # && php /var/www/html/occ preview:pre-generate
 
   cron:
-    container_name: cron
     image: nextcloud:fpm
+    container_name: cron
+    hostname: cron
     restart: always
     volumes_from:
       - nextcloud
@@ -364,6 +374,7 @@ services:
   nextcloud:  
     image: nextcloud:fpm
     container_name: nextcloud
+    hostname: nextcloud
     restart: always
     volumes:
       - nextcloud:/var/www/html
@@ -384,8 +395,9 @@ services:
 
   nginx:
     image: nginx
-    restart: always
     container_name: nginx
+    hostname: nginx
+    restart: always
     volumes:
       - /opt/appdata/nginx/nextcloud.conf:/etc/nginx/nginx.conf
       - /opt/appdata/nextcloud/custom_apps:/var/www/html/custom_apps
@@ -401,8 +413,9 @@ services:
       - default
 
   letsencrypt-companion:
-    container_name: letsencrypt
     image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt
+    hostname: letsencrypt
     restart: always
     volumes:
       - /opt/appdata/proxy/certs:/etc/nginx/certs
@@ -419,6 +432,7 @@ services:
   mqtt:
     image: eclipse-mosquitto
     container_name: mqtt
+    hostname: mqtt
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
@@ -431,6 +445,8 @@ services:
   hass:
     image: homeassistant/home-assistant
     container_name: hass
+    hostname: hass
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
