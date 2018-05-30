@@ -23,7 +23,7 @@ storj=$(ps -eF --sort=-rss|grep json|head -n1|awk -F"[/.]" '{print $13}')
 
 	 current=$(($(($(free -m |awk 'NR==2 {print $3}') * 100)) / 16010))
 
-     echo -e "The memory usage has reached $usage% restarting:\n $top3\n Current usage: $current%" | mail -s "High Memory Usage Alert" ${EMAIL}
+     echo -e "The memory usage has reached $usage\% restarting:\n $top3\n Current usage: $current\%" | mail -s "High Memory Usage Alert" ${EMAIL}
 
 
      fi
