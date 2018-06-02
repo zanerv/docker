@@ -265,6 +265,7 @@ services:
     labels:
       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     volumes:
+      - /opt/appdata/hass/ssl:/ssl:ro
       - /opt/appdata/proxy/certs:/etc/nginx/certs:ro
       - /opt/appdata/proxy/conf.d:/etc/nginx/conf.d
       - /opt/appdata/proxy/vhost.d:/etc/nginx/vhost.d
