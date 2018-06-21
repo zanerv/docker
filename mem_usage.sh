@@ -1,36 +1,41 @@
 #!/bin/bash
 
-threshold=80
+threshold1=80
 threshold2=90
+
+usage() {
 
 usage=$(($(($(free -m |awk 'NR==2 {print $3}') * 100)) / 16010))
 
-if [ "$usage" -gt "$threshold" ]
+echo ${usage}
 
-then
+}
 
-storjtop3=$(ps -eF --sort=-rss|grep json|head -n3|awk -F"[/.]" '{print $13}')
+restart() {
 
-storj=$(docker stats $storjtop3 --no-stream --format "table {{.Name}}\t{{.CPUPerc}}" | sort -k 2 -h | grep -v CPU | head -1 | awk '{print $1}')
+echo /usr/bin/docker restart ${1}
 
-/usr/bin/docker restart $storj
+echo -e "The memory usage is above ${2}% restarting:\n ${1}\n Current usage: $(usage)%" | mail -s "OOM restarted ${1}" ${EMAIL}
 
-     echo -e "The memory usage has reached $usage\% restarting:\n $storj\n Current usage: $current\%" | mail -s "Memory Usage Alert" ${EMAIL}
+}
 
-     if [ "$usage" -gt "$threshold2" ]
+storjtop() {
 
-     then
+storj=$(docker stats $(ps -eF --sort=-rss|grep json|head -n${1}|awk -F"[/.]" '{print $13}') --no-stream --format "table {{.Name}}\t{{.CPUPerc}}" | sort -k 2 -h | grep -v CPU | head -${2} | awk '{print $1}'|tr '\r\n' ' ') >/dev/null 2>&1
 
-	 storjtop3=$(ps -eF --sort=-rss|grep json|head -n6|awk -F"[/.]" '{print $13}')
-	 
-	 storj=$(docker stats $storjtop3 --no-stream --format "table {{.Name}}\t{{.CPUPerc}}" | sort -k 2 -h | grep -v CPU | head -3 | awk '{print $1}')
+echo ${storj}
 
-	 /usr/bin/docker restart storj
-
-	 current=$(($(($(free -m |awk 'NR==2 {print $3}') * 100)) / 16010))
-
-     echo -e "The memory usage has reached $usage\% restarting:\n $top3\n Current usage: $current\%" | mail -s "High Memory Usage Alert" ${EMAIL}
+}
 
 
-     fi
+if [ $(usage) -gt "${threshold1}" -a $(usage) -lt "${threshold2}" ]; then
+
+restart "$(storjtop 3 1)" ${threshold1}
+
+fi
+
+if [ $(usage) -gt "${threshold2}" ]; then
+
+restart "$(storjtop 6 3)" ${threshold2}
+
 fi
