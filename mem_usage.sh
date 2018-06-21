@@ -13,7 +13,7 @@ echo ${usage}
 
 restart() {
 
-echo /usr/bin/docker restart ${1}
+/usr/bin/docker restart ${1}
 
 echo -e "The memory usage is above ${2}% restarting:\n ${1}\n Current usage: $(usage)%" | mail -s "OOM restarted ${1}" ${EMAIL}
 
