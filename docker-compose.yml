@@ -452,6 +452,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
       - /opt/appdata/hass:/config
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 8123:8123/tcp
     restart: always
