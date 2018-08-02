@@ -26,7 +26,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4001:4001
     networks:
@@ -49,7 +49,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4002:4002
     networks:
@@ -72,7 +72,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4003:4003
     networks:
@@ -95,7 +95,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4004:4004
     networks:
@@ -118,7 +118,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4005:4005
     networks:
@@ -141,7 +141,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4006:4006
     networks:
@@ -164,7 +164,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4007:4007
     networks:
@@ -187,7 +187,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4008:4008
     networks:
@@ -210,7 +210,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4009:4009
     networks:
@@ -233,7 +233,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4010:4010
     networks:
@@ -256,7 +256,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4011:4011
     networks:
@@ -279,7 +279,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4012:4012
     networks:
@@ -302,7 +302,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4013:4013
     networks:
@@ -325,7 +325,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4014:4014
     networks:
@@ -348,7 +348,7 @@ services:
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - ./storj.env
+     - /opt/storj.env
     ports:
       - 4015:4015
     networks:
@@ -364,39 +364,20 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
-      - /mnt/S2WB/storj16:/data
+      - /mnt/S2WM/storj16:/data
       - /opt/appdata/storj/16:/config
       - /opt/appdata/storj/log:/logs
       - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
+#    environment:
+#      - ENABLE_DASHBOARD=true
+#      - DASHBOARD_USER_EMAIL=${DASHBOARD_USER_EMAIL}
+#      - DASHBOARD_USER_SECRET=${DASHBOARD_USER_SECRET}
     env_file:
-     - ./storj.env
+      - ./storj.env
     ports:
       - 4016:4016
     networks:
       storj:
         ipv4_address: 10.0.1.16
-
-  storj17:
-    image: madcatsu/storjshare-multi-daemon
-    mem_limit: 2g
-    container_name: storj17
-    hostname: storj17
-    restart: unless-stopped
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
-      - /mnt/S2WM/storj17:/data
-      - /opt/appdata/storj/17:/config
-      - /opt/appdata/storj/log:/logs
-      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
-    command: --create-user abc:1001:1001
-    env_file:
-     - ./storj.env
-    ports:
-      - 4017:4017
-    networks:
-      storj:
-        ipv4_address: 10.0.1.17

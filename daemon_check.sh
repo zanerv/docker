@@ -10,7 +10,8 @@ for i in $(docker ps --format '{{.Names}}'|grep storj|tr -d storj)
 
          /usr/bin/docker restart storj$i
 
-         echo -e "Storj$i node restarted!" | mail -s "Storj$i Daemon Crash" ${EMAIL}
+         curl --silent --output /dev/null -X POST -H "Content-Type: application/json" -d '{"title": "Storj","message": "Storj'${i}' daemon was restarted"}'  http://localhost:8123/api/services/notify/hass
+	 #echo -e "Storj$i node restarted!" | mail -s "Storj$i Daemon Crash" ${EMAIL}
 
        fi
 done

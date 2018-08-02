@@ -15,7 +15,8 @@ restart() {
 
 /usr/bin/docker restart ${1}
 
-echo -e "The memory usage is above ${2}% restarting:\n ${1}\n Current usage: $(usage)%" | mail -s "OOM restarted ${1}" ${EMAIL}
+curl --silent --output /dev/null -X POST -H "Content-Type: application/json" -d '{"title": "Storj","message": "Memory usage is above '${2}'% restarting:\n'${1}'\nCurrent usage: '$(usage)'%"}'  http://localhost:8123/api/services/notify/hass
+##echo -e "The memory usage is above ${2}% restarting:\n ${1}\n Current usage: $(usage)%" | mail -s "OOM restarted ${1}" ${EMAIL}
 
 }
 

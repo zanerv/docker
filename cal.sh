@@ -169,29 +169,33 @@ for dav_user_calendar_path in ${dav_user_calendar_paths}; do
       ;&
   esac
 
+    if [ "$events_count" -lt "1" -a "$todos_count" -lt "1" ]; then
+      echo "  There are no events, nor tasks for today"
+    fi
+  
     if [ "$events_count" -ge "1" ]; then
       echo "  Today's events: "
       printf "$events\n" | tr -s "\n" | sed "s/^SUMMARY://" | while read event; do
         echo "    * $event"
       done  
-    else
-      echo "  There are no events for today"
+    # else
+      # echo "  There are no events for today"
     fi
 
     if [ "$todos_count" -ge "1" ]; then
       echo " Tasks to be done today"
       printf "$todos\n" | tr -s "\n" | sed "s/^SUMMARY://" | while read todo; do
         echo "    * $todo"
-      done  
-    else
-      echo " There are no tasks for today"
+      done
+    # else
+      # echo " There are no tasks for today"
     fi
 
     if [ "$overdue_todos_count" -ge "1" ]; then
       echo " Overdue tasks"
       printf "$overdue_todos\n" | tr -s "\n" | sed "s/^SUMMARY://" | while read todo; do
-        echo "    * $todo"
-      done  
+        echo "    * $todo a"
+      done
     fi
 
 

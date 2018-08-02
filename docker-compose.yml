@@ -138,7 +138,7 @@ services:
       - VIRTUAL_HOST=plex.${DOMAIN}
       - VIRTUAL_PORT=32400
       - LETSENCRYPT_HOST=plex.${DOMAIN}
-      - ADVERTISE_IP=http://${IP}:32400/
+      - ADVERTISE_IP=https://plex.${DOMAIN}/
       - PLEX_CLAIM="nope"
       - PLEX_UID=${PUID}
       - PLEX_GID=${PGID}
