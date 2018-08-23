@@ -460,6 +460,8 @@ services:
     depends_on:
       - mqtt
       - db
+    environment:
+      - PATH=$PATH:/config
 
   # collectd:
     # image: fr3nd/collectd

@@ -15,8 +15,18 @@ restart() {
 
 /usr/bin/docker restart ${1}
 
-curl --silent --output /dev/null -X POST -H "Content-Type: application/json" -d '{"title": "Storj","message": "Memory usage is above '${2}'% restarting:\n'${1}'\nCurrent usage: '$(usage)'%"}'  http://localhost:8123/api/services/notify/hass
-##echo -e "The memory usage is above ${2}% restarting:\n ${1}\n Current usage: $(usage)%" | mail -s "OOM restarted ${1}" ${EMAIL}
+echo "$(date) Memory above ${2}% restarting: ${1} Current usage: $(usage)%" >> /opt/mem.log
+
+if [ $(cat /opt/mem.log|wc -l) -gt 5 ]; then
+
+curl --silent --output /dev/null -X POST -H "Content-Type: application/json" -d '{"title": "Storj","message": "'$(cat /opt/mem.log)'"}'  http://localhost:8123/api/services/notify/hass
+
+mv /opt/mem.log /opt/mem.log$(date +%d-%m);touch /opt/mem.log
+
+fi
+
+#curl --silent --output /dev/null -X POST -H "Content-Type: application/json" -d '{"title": "Storj","message": "Memory usage is above '${2}'% restarting:\n'${1}'\nCurrent usage: '$(usage)'%"}'  http://localhost:8123/api/services/notify/hass
+#echo -e "The memory usage is above ${2}% restarting:\n ${1}\n Current usage: $(usage)%" | mail -s "OOM restarted ${1}" ${EMAIL}
 
 }
 
