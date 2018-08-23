@@ -15,7 +15,7 @@ restart() {
 
 /usr/bin/docker restart ${1}
 
-echo "$(date) Memory above ${2}% restarting: ${1} Current usage: $(usage)%" >> /opt/mem.log
+echo "$(date) Memory above: ${2}% Restarting: ${1} Current usage: $(usage)%" >> /opt/mem.log
 
 if [ $(cat /opt/mem.log|wc -l) -gt 5 ]; then
 
