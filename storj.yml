@@ -7,6 +7,10 @@ networks:
      config:
        - subnet: 10.0.0.0/16
          gateway: 10.0.0.1
+#  storjv3:
+#    driver: macvlan
+#    driver_opts:
+#      parent: eno2
 
 services:
 
@@ -29,9 +33,11 @@ services:
      - /opt/storj.env
     ports:
       - 4001:4001
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.1
+        
 
   storj2:
     image: madcatsu/storjshare-multi-daemon
@@ -52,6 +58,7 @@ services:
      - /opt/storj.env
     ports:
       - 4002:4002
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.2
@@ -75,6 +82,7 @@ services:
      - /opt/storj.env
     ports:
       - 4003:4003
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.3
@@ -98,6 +106,7 @@ services:
      - /opt/storj.env
     ports:
       - 4004:4004
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.4
@@ -121,6 +130,7 @@ services:
      - /opt/storj.env
     ports:
       - 4005:4005
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.5
@@ -144,6 +154,7 @@ services:
      - /opt/storj.env
     ports:
       - 4006:4006
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.6
@@ -167,6 +178,7 @@ services:
      - /opt/storj.env
     ports:
       - 4007:4007
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.7
@@ -190,6 +202,7 @@ services:
      - /opt/storj.env
     ports:
       - 4008:4008
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.8
@@ -213,6 +226,7 @@ services:
      - /opt/storj.env
     ports:
       - 4009:4009
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.9
@@ -236,6 +250,7 @@ services:
      - /opt/storj.env
     ports:
       - 4010:4010
+#    dns: 8.8.8.8
     networks:
       storj:
         ipv4_address: 10.0.1.10
@@ -259,12 +274,13 @@ services:
      - /opt/storj.env
     ports:
       - 4011:4011
+#    dns: 8.8.8.8
     networks:
       storj:
         ipv4_address: 10.0.1.11
 
   storj12:
-    image: madcatsu/storjshare-multi-daemon
+    image: 146c07fdaff3
     mem_limit: 2g
     container_name: storj12
     hostname: storj12
@@ -282,6 +298,7 @@ services:
      - /opt/storj.env
     ports:
       - 4012:4012
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.12
@@ -305,6 +322,7 @@ services:
      - /opt/storj.env
     ports:
       - 4013:4013
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.13
@@ -328,6 +346,7 @@ services:
      - /opt/storj.env
     ports:
       - 4014:4014
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.14
@@ -351,6 +370,7 @@ services:
      - /opt/storj.env
     ports:
       - 4015:4015
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.15
@@ -370,14 +390,36 @@ services:
       - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
       - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
-#    environment:
-#      - ENABLE_DASHBOARD=true
-#      - DASHBOARD_USER_EMAIL=${DASHBOARD_USER_EMAIL}
-#      - DASHBOARD_USER_SECRET=${DASHBOARD_USER_SECRET}
     env_file:
       - ./storj.env
     ports:
       - 4016:4016
+#    dns: 1.1.1.1
     networks:
       storj:
         ipv4_address: 10.0.1.16
+
+  # storj17:
+    # image: oreandawe/storjshare-cli:latest
+    # mem_limit: 2g
+    # container_name: storj17
+    # hostname: storj17
+    # restart: unless-stopped
+    # volumes:
+      # - /mnt/storj_test:/storj
+    # environment:
+      # - WALLET_ADDRESS=${WALLET_ADDRESS}
+      # - DAEMONADDRESS=0.0.0.0
+      # - DATADIR=/storj
+      # - SHARE_SIZE=${SHARE_SIZE}
+      # - RPCADDRESS=${RPCADDRESS}
+      # - RPCPORT=4017
+      # - TUNNELING_REQUIRED=FALSE
+    # ports:
+      # - 4017:4017
+    # dns: 1.1.1.1
+    # networks:
+      # storj:
+        # ipv4_address: 10.0.1.17
+        
+

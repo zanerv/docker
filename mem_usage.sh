@@ -17,7 +17,7 @@ restart() {
 
 echo "$(date) Memory above: ${2}% Restarting: ${1} Current usage: $(usage)%" >> /opt/mem.log
 
-if [ $(cat /opt/mem.log|wc -l) -gt 5 ]; then
+if [ $(cat /opt/mem.log|wc -l) -gt 4 ]; then
 
 curl --silent --output /dev/null -X POST -H "Content-Type: application/json" -d '{"title": "Storj","message": "'"$(cat /opt/mem.log)"'"}'  http://localhost:8123/api/services/notify/hass
 
