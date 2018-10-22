@@ -285,7 +285,6 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
     environment:
       - DEFAULT_HOST=pihole.${DOMAIN}
-    dns: ${DNS}
     networks:
       proxy-tier:
         ipv4_address: 172.19.0.4
@@ -426,7 +425,7 @@ services:
     environment:
       - VIRTUAL_HOST=z.${DOMAIN}
       - LETSENCRYPT_HOST=z.${DOMAIN}
-#      - LETSENCRYPT_EMAIL=${EMAIL}
+      # - LETSENCRYPT_EMAIL=${EMAIL}
     depends_on:
       - nextcloud
     dns: ${DNS}
@@ -445,7 +444,6 @@ services:
       - /opt/appdata/proxy/vhost.d:/etc/nginx/vhost.d
       - /opt/appdata/proxy/html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    dns: ${DNS}
     networks:
       - proxy-tier
     depends_on:
@@ -485,15 +483,18 @@ services:
       - db
     environment:
       - PATH=$PATH:/config
+      - IP=${IP}
 
-  watchtower:
-    image: v2tec/watchtower
-    container_name: watchtower
-    hostname: watchtower
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
-#      - /opt/appdata/watchtower/config.json:/config.json
-    command: --cleanup --debug --interval 3600
+#  watchtower:
+#    image: v2tec/watchtower
+#    container_name: watchtower
+#    hostname: watchtower
+#    restart: always
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#      - /etc/localtime:/etc/localtime:ro
+#      - /dev/rtc:/dev/rtc:ro
+##      - /opt/appdata/watchtower/config.json:/config.json
+#    environment:
+#      - WATCHTOWER_CLEANUP
+#      - WATCHTOWER_POLL_INTERVAL:3600

@@ -41,7 +41,7 @@ dav_user_calendar_home_path=$(curl --silent \
                               ${dav_server}${dav_user_path} | \
                          xmlstarlet sel -t -v 'd:multistatus/d:response/d:propstat/d:prop/cal:calendar-home-set/d:href' -n) 
 
-# Get calendar paths                                      
+# Get calendar paths
 dav_user_calendar_paths=$(curl --silent \
             	     --request PROPFIND \
                      --header 'Content-Type: text/xml' \
@@ -172,12 +172,12 @@ for dav_user_calendar_path in ${dav_user_calendar_paths}; do
     if [ "$events_count" -lt "1" -a "$todos_count" -lt "1" ]; then
       echo "  There are no events, nor tasks for today"
     fi
-  
+
     if [ "$events_count" -ge "1" ]; then
       echo "  Today's events: "
       printf "$events\n" | tr -s "\n" | sed "s/^SUMMARY://" | while read event; do
         echo "    * $event"
-      done  
+      done
     # else
       # echo "  There are no events for today"
     fi

@@ -16,8 +16,6 @@ total=$(curl -s --cookie $cookie_path https://www.storjdash.com/|grep "flipInX"|
 login(){
 # Authentication. POST to $login_url.
 curl -s $login_url -c $cookie_path -d "email=$DASHBOARD_USER_EMAIL&password=$DASHBOARD_USER_SECRET" >> /dev/null
-
-#curl -c $cookie_path -d "username=$DASHBOARD_USER_EMAIL&password=$DASHBOARD_USER_SECRET" "$login_url" -s >> /dev/null
 }
 
 get_data

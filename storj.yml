@@ -280,7 +280,7 @@ services:
         ipv4_address: 10.0.1.11
 
   storj12:
-    image: 146c07fdaff3
+    image: madcatsu/storjshare-multi-daemon
     mem_limit: 2g
     container_name: storj12
     hostname: storj12
