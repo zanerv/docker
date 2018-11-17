@@ -6,7 +6,25 @@ networks:
   proxy-tier:
 
 services:
-
+  cloud9:
+    image: kdelfour/cloud9-docker
+    container_name: cloud9
+    hostname: cloud9
+    restart: always
+    ports:
+     - 80
+    environment:
+      - VIRTUAL_HOST=cloud9.${DOMAIN}
+      - VIRTUAL_PORT=80
+    volumes:
+      - /opt/appdata/cloud9:/workspace
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+    dns: ${DNS}
+    networks:
+      - proxy-tier
+      - default
+    
   firetv-server:
     image: marvambass/firetv-server
     container_name: firetv
@@ -327,6 +345,7 @@ services:
       - 'smokeping smokeping.${DOMAIN}:${IP}'
       - 'tautulli tautulli.${DOMAIN}:${IP}'
       - 'hass hass.${DOMAIN}:${IP}'
+      - 'cloud9 cloud9.${DOMAIN}:${IP}'
       - 'obama obama.${DOMAIN}:${obama}'
     volumes:
       - /var/log/pihole.log:/var/log/pihole.log
@@ -484,8 +503,6 @@ services:
     environment:
       - PATH=$PATH:/config
       - IP=${IP}
-
-#  watchtower:
 #    image: v2tec/watchtower
 #    container_name: watchtower
 #    hostname: watchtower
