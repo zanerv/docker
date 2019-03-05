@@ -24,13 +24,13 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
       - /media/storj7:/data
-      - /opt/appdata/storj/1:/config
-      - /opt/appdata/storj/log:/logs
-      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+      - ${OPT}/storj/1:/config
+      - ${OPT}/storj/log:/logs
+      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - /opt/storj.env
+     - ${STENV}
     ports:
       - 4001:4001
     networks:
@@ -47,13 +47,13 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
       - /mnt/S8SA/storj9:/data
-      - /opt/appdata/storj/2:/config
-      - /opt/appdata/storj/log:/logs
-      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+      - ${OPT}/storj/2:/config
+      - ${OPT}/storj/log:/logs
+      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - /opt/storj.env
+     - ${STENV}
     ports:
       - 4002:4002
 #    dns: 1.1.1.1
@@ -71,13 +71,13 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
       - /mnt/S2WM/storj10:/data
-      - /opt/appdata/storj/3:/config
-      - /opt/appdata/storj/log:/logs
-      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+      - ${OPT}/storj/3:/config
+      - ${OPT}/storj/log:/logs
+      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - /opt/storj.env
+     - ${STENV}
     ports:
       - 4003:4003
     networks:
@@ -94,13 +94,13 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
       - /mnt/S3HB/storj14:/data
-      - /opt/appdata/storj/4:/config
-      - /opt/appdata/storj/log:/logs
-      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+      - ${OPT}/storj/4:/config
+      - ${OPT}/storj/log:/logs
+      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - /opt/storj.env
+     - ${STENV}
     ports:
       - 4004:4004
 #    dns: 1.1.1.1
@@ -118,13 +118,13 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
       - /mnt/S3HB/storj15:/data
-      - /opt/appdata/storj/5:/config
-      - /opt/appdata/storj/log:/logs
-      - /opt/appdata/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - /opt/appdata/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
+      - ${OPT}/storj/5:/config
+      - ${OPT}/storj/log:/logs
+      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
+      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
     command: --create-user abc:1001:1001
     env_file:
-     - /opt/storj.env
+     - ${STENV}
     ports:
       - 4005:4005
 #    dns: 1.1.1.1

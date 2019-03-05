@@ -19,8 +19,8 @@ echo "$(date) Memory above: ${2}% Restarting: ${1} Current usage: $(usage)%" >> 
 
 if [ $(cat /opt/mem.log|wc -l) -gt 4 ]; then
 
-curl --silent --output /dev/null -X POST -H "Content-Type: application/json" -d '{"title": "Storj","message": "'"$(cat /opt/mem.log)"'"}'  http://localhost:8123/api/services/notify/hass
-
+#curl --silent --output /dev/null -X POST -H "Content-Type: application/json" -d '{"title": "Storj","message": "'"$(cat /opt/mem.log)"'"}'  http://localhost:8123/api/services/notify/hass
+curl --silent --output /dev/null -F chat_id=$chat_id -F document=@"/opt/mem.log" $chat_url
 mv /opt/mem.log /opt/mem.log$(date +%d-%m);touch /opt/mem.log
 
 fi

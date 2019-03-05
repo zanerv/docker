@@ -6,6 +6,42 @@ networks:
   proxy-tier:
 
 services:
+
+  unifi:
+    image: linuxserver/unifi
+    container_name: unifi
+    hostname: unifi
+    restart: always
+    ports:
+     - '3478:3478/udp'
+     - '10001:10001/udp'
+     - '6789:6789/tcp'
+     - '8080:8080/tcp'
+     - '8880:8880/tcp'
+     - '8443:8443/tcp'
+     - '8843:8843/tcp'
+    volumes:
+     - ${OPT}/unifi:/config
+    environment:
+     - VIRTUAL_HOST=unifi.${DOMAIN}
+     - VIRTUAL_PORT=8080
+     - PGID=${PGID}
+     - PUID=${PUID}
+    networks:
+      - proxy-tier
+      - default
+  
+  # jupyterlab:
+  #   image: mikebirdgeneau/jupyterlab
+  #   container_name: jupyterlab
+  #   hostname: jupyterlab
+  #   restart: always
+  #   ports:
+  #     - "8888:8888"
+  #   volumes:
+  #     - ${OPT}/jupyterlab:/opt/app/data
+  #   entrypoint: sh -c 'jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --notebook-dir=/opt/app/data --allow-root'
+
   cloud9:
     image: kdelfour/cloud9-docker
     container_name: cloud9
@@ -16,10 +52,13 @@ services:
     environment:
       - VIRTUAL_HOST=cloud9.${DOMAIN}
       - VIRTUAL_PORT=80
+      - GIT_SSH_COMMAND="ssh -i /root/.ssh/id_rsa"
     volumes:
-      - /opt/appdata/cloud9/skins.xml:/cloud9/plugins/c9.ide.layout.classic/skins.xml
-      - /opt/appdata/cloud9/cloud9.conf:/etc/supervisor/conf.d/cloud9.conf
+      - ${OPT}/cloud9/skins.xml:/cloud9/plugins/c9.ide.layout.classic/skins.xml
+      - ${OPT}/cloud9/cloud9.conf:/etc/supervisor/conf.d/cloud9.conf
       - /opt:/opt
+      - /root/.gitconfig:/root/.gitconfig:ro
+      - /root/.ssh/git_rsa:/root/.ssh/id_rsa:ro
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
     dns: ${DNS}
@@ -39,8 +78,8 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - /opt/appdata/tautulli/logs:/logs
-      - /opt/appdata/tautulli/config:/config
+      - ${OPT}/tautulli/logs:/logs
+      - ${OPT}/tautulli/config:/config
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
     dns: ${DNS}
@@ -60,9 +99,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      # - /opt/appdata/smokeping/resolv.conf:/etc/resolv.conf:ro
-      - /opt/appdata/smokeping/data:/data
-      - /opt/appdata/smokeping/config:/config
+      # - ${OPT}/smokeping/resolv.conf:/etc/resolv.conf:ro
+      - ${OPT}/smokeping/data:/data
+      - ${OPT}/smokeping/config:/config
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
     dns: ${DNS}
@@ -79,9 +118,9 @@ services:
       - "8086:8086"
       - "25826:25826/udp"
     volumes:
-      - /opt/appdata/influxdb:/var/lib/influxdb
-      - /opt/appdata/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
-      - /opt/appdata/collectd/types.db:/usr/share/collectd/types.db:ro
+      - ${OPT}/influxdb:/var/lib/influxdb
+      - ${OPT}/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - ${OPT}/collectd/types.db:/usr/share/collectd/types.db:ro
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
     dns: ${DNS}
@@ -108,8 +147,8 @@ services:
       - GF_SMTP_PASSWORD=${EMAIL_PASS}
       - GF_SMTP_SKIP_VERIFY=true
     volumes:
-      - /opt/appdata/grafana/plugins:/var/lib/grafana/plugins
-      - /opt/appdata/grafana:/var/lib/grafana
+      - ${OPT}/grafana/plugins:/var/lib/grafana/plugins
+      - ${OPT}/grafana:/var/lib/grafana
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
     dns: ${DNS}
@@ -124,8 +163,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
-      - /opt/appdata/plex/40-plex-first-run:/etc/cont-init.d/40-plex-first-run
-      - /opt/appdata/plex:/config
+      - ${OPT}/plex/40-plex-first-run:/etc/cont-init.d/40-plex-first-run
+      - ${OPT}/plex:/config
       - /media/Movies:/media/Movies
       - /media/Music:/media/Music
       - /media/TV:/media/TV
@@ -168,7 +207,7 @@ services:
       - 51413:51413
     restart: always
     volumes:
-      - /opt/appdata/transmission:/config
+      - ${OPT}/transmission:/config
       - /etc/localtime:/etc/localtime:ro
       - /media/tmp:/media/tmp
       - /media/Movies:/media/Movies
@@ -191,7 +230,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
-      - /opt/appdata/couchpotato:/config
+      - ${OPT}/couchpotato:/config
       - /media/Movies:/media/Movies 
     ports:
       - 5050:5050
@@ -213,12 +252,12 @@ services:
     container_name: sickrage
     hostname: sickrage
     ports:
-    - 8081:8081
+    - 8082:8081
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - VIRTUAL_HOST=sickrage.${DOMAIN}
-      - VIRTUAL_PORT=8081
+      - VIRTUAL_PORT=8082
     restart: always
     links:
       - transmission:transmission
@@ -226,7 +265,7 @@ services:
       - transmission
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /opt/appdata/sickrage:/config
+      - ${OPT}/sickrage:/config
       - /media/tmp:/media/tmp
       - /media/TV:/media/TV
     dns: ${DNS}
@@ -248,7 +287,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
-      - /opt/appdata/portainer:/data
+      - ${OPT}/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart:
       always
@@ -267,7 +306,7 @@ services:
      - "1194:1194/udp"
     restart: always
     volumes:
-      - /opt/appdata/openvpn:/etc/openvpn
+      - ${OPT}/openvpn:/etc/openvpn
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
     dns: ${DNS}
@@ -283,11 +322,11 @@ services:
     labels:
       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     volumes:
-      - /opt/appdata/hass/ssl:/ssl:ro
-      - /opt/appdata/proxy/certs:/etc/nginx/certs:ro
-      - /opt/appdata/proxy/conf.d:/etc/nginx/conf.d
-      - /opt/appdata/proxy/vhost.d:/etc/nginx/vhost.d
-      - /opt/appdata/proxy/html:/usr/share/nginx/html
+      - ${OPT}/hass/ssl:/ssl:ro
+      - ${OPT}/proxy/certs:/etc/nginx/certs:ro
+      - ${OPT}/proxy/conf.d:/etc/nginx/conf.d
+      - ${OPT}/proxy/vhost.d:/etc/nginx/vhost.d
+      - ${OPT}/proxy/html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     environment:
       - DEFAULT_HOST=pihole.${DOMAIN}
@@ -335,9 +374,10 @@ services:
       - 'hass hass.${DOMAIN}:${IP}'
       - 'cloud9 cloud9.${DOMAIN}:${IP}'
       - 'obama obama.${DOMAIN}:${obama}'
+      - 'unifi unifi.${DOMAIN}:${IP}'
     volumes:
       - /var/log/pihole.log:/var/log/pihole.log
-      - /opt/appdata/pihole:/etc/pihole
+      - ${OPT}/pihole:/etc/pihole
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
     restart: always
@@ -354,7 +394,7 @@ services:
     restart: always
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
-      - /opt/appdata/mariadb:/var/lib/mysql
+      - ${OPT}/mariadb:/var/lib/mysql
       # - /root/nextcloud.db:/docker-entrypoint-initdb.d/nextcloud.sql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -404,10 +444,10 @@ services:
     restart: always
     volumes:
       - nextcloud:/var/www/html
-#      - /opt/appdata/nextcloud/.user.ini:/var/www/html/.user.ini
-      - /opt/appdata/nextcloud/config:/var/www/html/config/
-      - /opt/appdata/nextcloud/custom_apps:/var/www/html/custom_apps
-      - /opt/appdata/nextcloud/data:/var/www/html/data
+#      - ${OPT}/nextcloud/.user.ini:/var/www/html/.user.ini
+      - ${OPT}/nextcloud/config:/var/www/html/config/
+      - ${OPT}/nextcloud/custom_apps:/var/www/html/custom_apps
+      - ${OPT}/nextcloud/data:/var/www/html/data
     environment:
       - MYSQL_HOST=mariadb
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -426,8 +466,8 @@ services:
     hostname: nginx
     restart: always
     volumes:
-      - /opt/appdata/nginx/nextcloud.conf:/etc/nginx/nginx.conf
-      - /opt/appdata/nextcloud/custom_apps:/var/www/html/custom_apps
+      - ${OPT}/nginx/nextcloud.conf:/etc/nginx/nginx.conf
+      - ${OPT}/nextcloud/custom_apps:/var/www/html/custom_apps
       - nextcloud:/var/www/html:ro
     environment:
       - VIRTUAL_HOST=z.${DOMAIN}
@@ -446,10 +486,10 @@ services:
     hostname: letsencrypt
     restart: always
     volumes:
-      - /opt/appdata/proxy/certs:/etc/nginx/certs
-      - /opt/appdata/proxy/conf.d:/etc/nginx/conf.d
-      - /opt/appdata/proxy/vhost.d:/etc/nginx/vhost.d
-      - /opt/appdata/proxy/html:/usr/share/nginx/html
+      - ${OPT}/proxy/certs:/etc/nginx/certs
+      - ${OPT}/proxy/conf.d:/etc/nginx/conf.d
+      - ${OPT}/proxy/vhost.d:/etc/nginx/vhost.d
+      - ${OPT}/proxy/html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - proxy-tier
@@ -460,15 +500,15 @@ services:
     image: eclipse-mosquitto
     container_name: mqtt
     hostname: mqtt
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
-      - /opt/appdata/mqtt/:/mosquitto/config/
+      - ${OPT}/mqtt/:/mosquitto/config/
     ports:
       - 1883:1883
       - 9001:9001
     dns: ${DNS}
-    restart: always
 
   hass:
     image: homeassistant/home-assistant
@@ -478,7 +518,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
-      - /opt/appdata/hass:/config
+      - ${OPT}/hass:/config
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 8123:8123/tcp
@@ -487,7 +527,21 @@ services:
     depends_on:
       - mqtt
       - mariadb
+      - z2m
     environment:
       - PATH=$PATH:/config:/config/adb
       - LD_LIBRARY_PATH=/config/adb
       - IP=${IP}
+  z2m: 
+    image: koenkk/zigbee2mqtt
+    container_name: z2m
+    hostname: z2m
+    restart: always
+    depends_on:
+      - mqtt
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - ${OPT}/z2m:/app/data
+    devices:
+      - "/dev/ttyACM0"
