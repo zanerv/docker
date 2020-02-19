@@ -1,19 +1,154 @@
 ---
-version: '2'
+version: '3.4'
 volumes:
   nextcloud:
+
 networks:
   proxy-tier:
 
 services:
+  bitwarden:
+    image: bitwardenrs/server-mysql
+    container_name: bitwarden
+    hostname: bitwarden
+    environment:
+      - LETSENCRYPT_HOST=x.${DOMAIN}
+      - VIRTUAL_HOST=x.${DOMAIN}
+      - VIRTUAL_PORT=80
+      - ENABLE_DB_WAL='false'
+      - DATABASE_URL=mysql://bitwarden_rs:${MYSQL_PASSWORD}@mariadb/bitwarden_rs
+      - RUST_BACKTRACE=1
+      - WEBSOCKET_ENABLED='true'
+    volumes:
+      - ${OPT}/bitwarden:/data/:rw
+    ports:
+      - 80
+      - 3012
+    restart: unless-stopped
+    networks:
+      - default
+      - proxy-tier
+
+  ombi:
+    image: linuxserver/ombi:latest
+    container_name: ombi
+    hostname: ombi
+    environment:
+      - LETSENCRYPT_HOST=ombi.${DOMAIN}
+      - VIRTUAL_HOST=ombi.${DOMAIN}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/London
+    volumes:
+      - ${OPT}/ombi:/config
+    ports:
+      - 3579:3579
+    restart: unless-stopped
+    networks:
+      - default
+      - proxy-tier
+
+  # duplicati:
+  #   image: linuxserver/duplicati
+  #   container_name: duplicati
+  #   environment:
+  #     - VIRTUAL_HOST=duplicati.${DOMAIN}
+  #     - VIRTUAL_PORT=8200
+  #     - PGID=${PGID}
+  #     - PUID=${PUID}
+  #     - TZ=Europe/London
+  #     - CLI_ARGS= #optional
+  #   volumes:
+  #     - ${OPT}/duplicati:/config
+  #     - /mnt/S8SA/backups:/backups
+  #     - ${OPT}:/source
+  #   ports:
+  #     - 8200:8200
+  #   restart: unless-stopped
+  #   networks:
+  #     - proxy-tier
+  #     - default
+
+  # splunk:
+  #   image: splunk/splunk:latest
+  #   container_name: splunk
+  #   hostname: splunk
+  #   environment:
+  #     VIRTUAL_HOST: splunk.${DOMAIN}
+  #     VIRTUAL_PORT: 8000
+  #     SPLUNK_START_ARGS: --accept-license --answer-yes
+  #     SPLUNK_PASSWORD: ${SPLUNK_PASSWORD}
+  #     SPLUNK_ENABLE_LISTEN: 9997
+  #     SPLUNK_ADD: udp 515
+  #     SPLUNK_USER: root
+  #   volumes:
+  #    - ${OPT}/splunk/etc:/opt/splunk/etc
+  #    - ${OPT}/splunk/var:/opt/splunk/var
+  #   ports:
+  #    - "22222:22222"
+  #    - "8000:8000"
+  #    - "9997:9997"
+  #    - "8088:8088"
+  #    - "514:514/udp"
+  #   restart: unless-stopped
+  #   networks:
+  #     - proxy-tier
+  #     - default
+
+  telegraf:
+    image: telegraf
+    container_name: telegraf
+    hostname: telegraf
+    #privileged: true
+    links:
+      - mariadb
+      - influxdb
+    volumes:
+      - "${OPT}/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf"
+    environment:
+      - HOST_NAME=telegraf
+      - INFLUXDB_HOST=influxdb
+      - INFLUXDB_PORT=8086
+    dns: ${DNS}
+  
+  dockermon:
+    image: philhawthorne/ha-dockermon
+    container_name: dockermon
+    hostname: dockermon
+    #restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 8126:8126
+      
+#  hassio_supervisor:
+#    image: homeassistant/amd64-hassio-supervisor
+#    container_name: hassio_supervisor
+#    hostname: hassio_supervisor
+#    restart: unless-stopped
+#    privileged: true
+#    security_opt:
+#      - seccomp:unconfined
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - /var/run/dbus:/var/run/dbus
+#      - /dev/rtc:/dev/rtc:ro
+#      - /usr/share/hassio:/data
+#      - ${OPT}/hass:/data/homeassistant:ro
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    environment:
+#      - SUPERVISOR_SHARE=/usr/share/hassio
+#      - SUPERVISOR_NAME=hassio_supervisor
+#      - HOMEASSISTANT_REPOSITORY=homeassistant/qemux86-64-homeassistant
 
   unifi:
     image: linuxserver/unifi
     container_name: unifi
     hostname: unifi
-    restart: always
+    restart: unless-stopped
     ports:
      - '3478:3478/udp'
+     - '27117:27117'
      - '10001:10001/udp'
      - '6789:6789/tcp'
      - '8080:8080/tcp'
@@ -22,6 +157,8 @@ services:
      - '8843:8843/tcp'
     volumes:
      - ${OPT}/unifi:/config
+     - /etc/localtime:/etc/localtime:ro
+     - /dev/rtc:/dev/rtc:ro
     environment:
      - VIRTUAL_HOST=unifi.${DOMAIN}
      - VIRTUAL_PORT=8080
@@ -35,46 +172,19 @@ services:
   #   image: mikebirdgeneau/jupyterlab
   #   container_name: jupyterlab
   #   hostname: jupyterlab
-  #   restart: always
+  #   restart: unless-stopped
   #   ports:
   #     - "8888:8888"
   #   volumes:
   #     - ${OPT}/jupyterlab:/opt/app/data
   #   entrypoint: sh -c 'jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --notebook-dir=/opt/app/data --allow-root'
 
-  cloud9:
-    image: kdelfour/cloud9-docker
-    container_name: cloud9
-    hostname: cloud9
-    restart: always
-    ports:
-     - 80
-    environment:
-      - VIRTUAL_HOST=cloud9.${DOMAIN}
-      - VIRTUAL_PORT=80
-      - GIT_SSH_COMMAND="ssh -i /root/.ssh/id_rsa"
-    volumes:
-      - ${OPT}/cloud9/skins.xml:/cloud9/plugins/c9.ide.layout.classic/skins.xml
-      - ${OPT}/cloud9/cloud9.conf:/etc/supervisor/conf.d/cloud9.conf
-      - /opt:/opt
-      - /root/.gitconfig:/root/.gitconfig:ro
-      - /root/.ssh/git_rsa:/root/.ssh/id_rsa:ro
-      - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
-    dns: ${DNS}
-    networks:
-      - proxy-tier
-      - default
-
   tautulli:
     image: tautulli/tautulli
     container_name: tautulli
     hostname: tautulli
-    ports:
-     - 8181:8181
     environment:
       - VIRTUAL_HOST=tautulli.${DOMAIN}
-      - VIRTUAL_PORT=8181
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
@@ -85,21 +195,16 @@ services:
     dns: ${DNS}
     networks:
       - proxy-tier
-      - default
 
   smokeping:
     image: linuxserver/smokeping
     container_name: smokeping
     hostname: smokeping
-    ports:
-     - 80
     environment:
       - VIRTUAL_HOST=smokeping.${DOMAIN}
-      - VIRTUAL_PORT=80
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      # - ${OPT}/smokeping/resolv.conf:/etc/resolv.conf:ro
       - ${OPT}/smokeping/data:/data
       - ${OPT}/smokeping/config:/config
       - /etc/localtime:/etc/localtime:ro
@@ -107,13 +212,12 @@ services:
     dns: ${DNS}
     networks:
       - proxy-tier
-      - default
 
   influxdb:
     image: influxdb
     container_name: influxdb
     hostname: influxdb
-    restart: always
+    restart: unless-stopped
     ports:
       - "8086:8086"
       - "25826:25826/udp"
@@ -124,22 +228,17 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
     dns: ${DNS}
-    networks:
-      - default
       
   grafana:
     image: grafana/grafana
     container_name: grafana
     hostname: grafana
     user: "1001"
-    restart: always
+    restart: unless-stopped
     depends_on:
       - influxdb
-    ports:
-      - 3000
     environment:
       - VIRTUAL_HOST=grafana.${DOMAIN}
-      - VIRTUAL_PORT=3000
       - GF_SMTP_ENABLED=true
       - GF_SMTP_HOST=${DOMAIN}:25
       - GF_SMTP_FROM_ADDRESS=${EMAIL}
@@ -184,28 +283,27 @@ services:
       - 32412:32412/udp
       - 32413:32413/udp
       - 32414:32414/udp
-    restart: always
+    restart: unless-stopped
     environment:
       - VIRTUAL_HOST=plex.${DOMAIN}
       - VIRTUAL_PORT=32400
       - LETSENCRYPT_HOST=plex.${DOMAIN}
       - ADVERTISE_IP=https://plex.${DOMAIN}/
-      - PLEX_CLAIM="nope"
+      - PLEX_CLAIM=${PLEX_CLAIM}
       - PLEX_UID=${PUID}
       - PLEX_GID=${PGID}
     dns: ${DNS}
     networks:
       - proxy-tier
-      - default
 
   transmission:
     image: linuxserver/transmission
     container_name: transmission
     hostname: transmission
     ports:
-      - 9091:9091
+      - 9091
       - 51413:51413
-    restart: always
+    restart: unless-stopped
     volumes:
       - ${OPT}/transmission:/config
       - /etc/localtime:/etc/localtime:ro
@@ -216,10 +314,10 @@ services:
       - PGID=${PGID}
       - VIRTUAL_HOST=transmission.${DOMAIN}
       - VIRTUAL_PORT=9091
+    #  - TRANSMISSION_WEB_HOME=/combustion-release/
     dns: ${DNS}
     networks:
       - proxy-tier
-      - default
 
   couchpotato:
     image: linuxserver/couchpotato
@@ -232,33 +330,26 @@ services:
       - /dev/rtc:/dev/rtc:ro
       - ${OPT}/couchpotato:/config
       - /media/Movies:/media/Movies 
-    ports:
-      - 5050:5050
     links:
       - transmission:transmission
-    restart: always
+    restart: unless-stopped
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - VIRTUAL_HOST=couchpotato.${DOMAIN}
-      - VIRTUAL_PORT=5050
     dns: ${DNS}
     networks:
       - proxy-tier
-      - default
 
   sickrage:
     image: linuxserver/sickrage
     container_name: sickrage
     hostname: sickrage
-    ports:
-    - 8082:8081
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - VIRTUAL_HOST=sickrage.${DOMAIN}
-      - VIRTUAL_PORT=8082
-    restart: always
+    restart: unless-stopped
     links:
       - transmission:transmission
     depends_on:
@@ -271,30 +362,6 @@ services:
     dns: ${DNS}
     networks:
       - proxy-tier
-      - default
-
-  portainer:
-    image: portainer/portainer
-    container_name: portainer
-    hostname: portainer
-    ports:
-      - 9000
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - VIRTUAL_HOST=portainer.${DOMAIN}
-      - VIRTUAL_PORT=9000
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
-      - ${OPT}/portainer:/data
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart:
-      always
-    dns: ${DNS}
-    networks:
-      - proxy-tier
-      - default
 
   openvpn:
     cap_add:
@@ -304,18 +371,50 @@ services:
     hostname: openvpn
     ports:
      - "1194:1194/udp"
-    restart: always
+    expose:
+     - 5555
+    restart: unless-stopped
     volumes:
       - ${OPT}/openvpn:/etc/openvpn
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
     dns: ${DNS}
 
+  openvpn_monitor:
+    image: ruimarinho/openvpn-monitor
+    container_name: openvpn-monitor
+    hostname: openvpn-monitor
+    ports:
+      - 888:80
+    environment:
+      # General
+      OPENVPNMONITOR_DEFAULT_DATETIMEFORMAT: "%d/%m/%Y %H:%M:%S"
+#      OPENVPNMONITOR_DEFAULT_LOGO: "https://openvpn.net/wp-content/uploads/2018/06/about_text_logo.png"
+      OPENVPNMONITOR_DEFAULT_MAPS: "True"
+      OPENVPNMONITOR_DEFAULT_LATITUDE: "0.0"
+      OPENVPNMONITOR_DEFAULT_LONGITUDE: "0.0"
+      OPENVPNMONITOR_DEFAULT_SITE: Live
+      # Site 1 - CZ
+      OPENVPNMONITOR_SITES_0_ALIAS: CZ
+      OPENVPNMONITOR_SITES_0_HOST: openvpn
+      OPENVPNMONITOR_SITES_0_NAME: Shiny
+      OPENVPNMONITOR_SITES_0_PORT: 5555
+      # Site 2 - RO
+      OPENVPNMONITOR_SITES_1_ALIAS: RO
+      OPENVPNMONITOR_SITES_1_HOST: mk.kpu.ro
+      OPENVPNMONITOR_SITES_1_NAME: Mk
+      OPENVPNMONITOR_SITES_1_PORT: 5555
+      # Site 3 - RO
+      OPENVPNMONITOR_SITES_2_ALIAS: intra
+      OPENVPNMONITOR_SITES_2_HOST: mk.kpu.ro
+      OPENVPNMONITOR_SITES_2_NAME: Mk_intranet
+      OPENVPNMONITOR_SITES_2_PORT: 5556
+
   proxy:
     image: jwilder/nginx-proxy:alpine
     container_name: proxy
     hostname: proxy
-    restart: always
+    restart: unless-stopped
     ports:
       - 80:80
       - 443:443
@@ -328,72 +427,21 @@ services:
       - ${OPT}/proxy/vhost.d:/etc/nginx/vhost.d
       - ${OPT}/proxy/html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
-    environment:
-      - DEFAULT_HOST=pihole.${DOMAIN}
     networks:
       proxy-tier:
         ipv4_address: 172.19.0.4
-
-###Pi Hole###
-  pihole:
-    image: pihole/pihole
-    container_name: pihole
-    hostname: pihole
-    ports:
-      - ${IP}:53:53/tcp
-      - ${IP}:53:53/udp
-      - 8053:80/tcp
-      - 44353:443/tcp
-    cap_add:
-      - NET_ADMIN
-    environment:
-      # enter your docker host IP here
-      - ServerIP=${IP}
-      # jwilder/proxy envs, see readme for more info
-      - PROXY_LOCATION=pihole
-      - VIRTUAL_HOST=pihole.${DOMAIN}
-      - VIRTUAL_PORT=80
-      - WEBPASSWORD=${WEBPASSWORD}
-      - DNS1=1.1.1.1
-    # Add your own custom hostnames you need for your domain
-    extra_hosts:
-    # Resolve to nothing domains (terminate connection)
-      - 'nw2master.bioware.com nwn2.master.gamespy.com:0.0.0.0'
-    # LAN hostnames for other docker containers using jwilder
-      - 'sickrage sickrage.${DOMAIN}:${IP}'
-      - 'couchpotato couchpotato.${DOMAIN}:${IP}'
-      - 'transmission transmission.${DOMAIN}:${IP}'
-      - 'plex plex.${DOMAIN}:${IP}'
-      - 'grafana grafana.${DOMAIN}:${IP}'
-      - 'influxdb influxdb.${DOMAIN}:${IP}'
-      - 'z z.${DOMAIN}:${IP}'
-      - 'portainer portainer.${DOMAIN}:${IP}'
-      - 'pihole pihole.${DOMAIN}:${IP}'
-      - 'smokeping smokeping.${DOMAIN}:${IP}'
-      - 'tautulli tautulli.${DOMAIN}:${IP}'
-      - 'hass hass.${DOMAIN}:${IP}'
-      - 'cloud9 cloud9.${DOMAIN}:${IP}'
-      - 'obama obama.${DOMAIN}:${obama}'
-      - 'unifi unifi.${DOMAIN}:${IP}'
-    volumes:
-      - /var/log/pihole.log:/var/log/pihole.log
-      - ${OPT}/pihole:/etc/pihole
-      - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
-    restart: always
-    networks:
-      proxy-tier:
-      default:
-        ipv4_address: ${DNS}
 
 ###Nextcloud###
   mariadb:
     image: mariadb
     container_name: mariadb
     hostname: mariadb
-    restart: always
+    restart: unless-stopped
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - ${OPT}/mariadb/ncp-mysql.cnf:/etc/mysql/conf.d/ncp-mysql.cnf:ro
       - ${OPT}/mariadb:/var/lib/mysql
       # - /root/nextcloud.db:/docker-entrypoint-initdb.d/nextcloud.sql
     environment:
@@ -410,16 +458,21 @@ services:
     container_name: redis
     hostname: redis
     dns: ${DNS}
-    restart: always
+    restart: unless-stopped
 # && php /var/www/html/occ preview:pre-generate
 
   cron:
     image: nextcloud:fpm
     container_name: cron
     hostname: cron
-    restart: always
-    volumes_from:
-      - nextcloud
+    restart: unless-stopped
+    volumes:
+      - nextcloud:/var/www/html
+      - ${OPT}/nextcloud/config:/var/www/html/config/
+      - ${OPT}/nextcloud/custom_apps:/var/www/html/custom_apps
+      - ${OPT}/nextcloud/data/data:/var/www/html/data
+      - ${OPT}/nextcloud/memory-limit.ini:/usr/local/etc/php/conf.d/memory-limit.ini
+      - ${OPT}/nextcloud/mysql.ini:/usr/local/etc/php/conf.d/mysql.ini
     user: www-data
     entrypoint: |
       bash -c 'bash -s <<EOF
@@ -429,7 +482,7 @@ services:
         done
         while true; do
           php -f /var/www/html/cron.php && php /var/www/html/occ preview:pre-generate
-          sleep 15m
+          sleep 5m
         done
       EOF'
     dns: ${DNS}
@@ -441,13 +494,14 @@ services:
     image: nextcloud:fpm
     container_name: nextcloud
     hostname: nextcloud
-    restart: always
+    restart: unless-stopped
     volumes:
       - nextcloud:/var/www/html
-#      - ${OPT}/nextcloud/.user.ini:/var/www/html/.user.ini
       - ${OPT}/nextcloud/config:/var/www/html/config/
       - ${OPT}/nextcloud/custom_apps:/var/www/html/custom_apps
-      - ${OPT}/nextcloud/data:/var/www/html/data
+      - ${OPT}/nextcloud/memory-limit.ini:/usr/local/etc/php/conf.d/memory-limit.ini
+      - ${OPT}/nextcloud/mysql.ini:/usr/local/etc/php/conf.d/mysql.ini
+      - ${OPT}/nextcloud/data/data:/var/www/html/data
     environment:
       - MYSQL_HOST=mariadb
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -461,10 +515,10 @@ services:
       - redis
 
   nginx:
-    image: nginx
+    image: nginx:latest
     container_name: nginx
     hostname: nginx
-    restart: always
+    restart: unless-stopped
     volumes:
       - ${OPT}/nginx/nextcloud.conf:/etc/nginx/nginx.conf
       - ${OPT}/nextcloud/custom_apps:/var/www/html/custom_apps
@@ -474,6 +528,7 @@ services:
       - LETSENCRYPT_HOST=z.${DOMAIN}
       # - LETSENCRYPT_EMAIL=${EMAIL}
     depends_on:
+      - proxy
       - nextcloud
     dns: ${DNS}
     networks:
@@ -484,24 +539,26 @@ services:
     image: jrcs/letsencrypt-nginx-proxy-companion
     container_name: letsencrypt
     hostname: letsencrypt
-    restart: always
+    restart: unless-stopped
     volumes:
       - ${OPT}/proxy/certs:/etc/nginx/certs
       - ${OPT}/proxy/conf.d:/etc/nginx/conf.d
       - ${OPT}/proxy/vhost.d:/etc/nginx/vhost.d
       - ${OPT}/proxy/html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - proxy-tier
     depends_on:
       - proxy
+    networks:
+      - proxy-tier
       
   mqtt:
     image: eclipse-mosquitto
     container_name: mqtt
     hostname: mqtt
-    restart: always
+    restart: unless-stopped
+    user: 1883:1883
     volumes:
+      - ${OPT}/mqtt/data:/var/lib/mosquitto
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
       - ${OPT}/mqtt/:/mosquitto/config/
@@ -509,21 +566,44 @@ services:
       - 1883:1883
       - 9001:9001
     dns: ${DNS}
+ 
+  # hassio:
+  #   container_name: hassio
+  #   image: "homeassistant/amd64-hassio-supervisor"
+  #   restart: unless-stopped
+  #   privileged: true
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /var/run/dbus:/var/run/dbus
+  #     - ${OPT}/hassio:/data
+  #   environment:
+  #     - SUPERVISOR_SHARE=${OPT}/hassio
+  #     - SUPERVISOR_NAME=hassio
+  #     - HOMEASSISTANT_REPOSITORY=homeassistant/qemux86-64-homeassistant
+  #     - HOSTNAME=hassio
+  #   security_opt:
+  #     - seccomp:unconfined
+  #     - apparmor:unconfined
 
   hass:
-    image: homeassistant/home-assistant
+    image: homeassistant/home-assistant:latest
     container_name: hass
     hostname: hass
-    restart: always
+#    pid: "host"
     volumes:
+      - /root/.android:/root/.android:ro
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
       - ${OPT}/hass:/config
       - /var/run/docker.sock:/var/run/docker.sock
+    devices:
+      - /dev/bus/usb/002:/dev/bus/usb/002
     ports:
       - 8123:8123/tcp
-    restart: always
+    restart: unless-stopped
     network_mode: host
+    dns: ${DNS}
     depends_on:
       - mqtt
       - mariadb
@@ -532,16 +612,17 @@ services:
       - PATH=$PATH:/config:/config/adb
       - LD_LIBRARY_PATH=/config/adb
       - IP=${IP}
+      - HASS_TOKEN=$HASS_TOKEN
+
   z2m: 
     image: koenkk/zigbee2mqtt
     container_name: z2m
     hostname: z2m
-    restart: always
+    restart: unless-stopped
     depends_on:
       - mqtt
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
       - ${OPT}/z2m:/app/data
     devices:
       - "/dev/ttyACM0"

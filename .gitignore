@@ -1,8 +1,8 @@
-.c9/
 appdata/
 pfsense/
 dell/
 lsi/
-storjdash.com
 mem.lo*
 ssh.ip
+fail_over.sh 
+s.sh
