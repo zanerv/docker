@@ -1,135 +1,36 @@
 ---
 version: '2'
 networks:
-  storj:
-    driver: bridge
+  storjv3:
+    driver: macvlan
+    driver_opts:
+      parent: eno1
     ipam:
-     config:
-       - subnet: 10.0.0.0/16
-         gateway: 10.0.0.1
-#  storjv3:
-#    driver: macvlan
-#    driver_opts:
-#      parent: eno2
-
+      config:
+       - subnet: 192.168.0.0/24
+         gateway: 192.168.0.1
 services:
 
-  storj1:
-    image: madcatsu/storjshare-multi-daemon
-    mem_limit: 2g
-    container_name: storj1
-    hostname: storj1
+  storagenode:
+    image: storjlabs/storagenode:beta
+#    mem_limit: 2g
+    container_name: storagenode 
+    hostname: storagenode 
     restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /dev/rtc:/dev/rtc:ro
-      - /media/storj7:/data
-      - ${OPT}/storj/1:/config
-      - ${OPT}/storj/log:/logs
-      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
-    command: --create-user abc:1001:1001
-    env_file:
-     - ${STENV}
+      - /opt/appdata/storj/identity/storagenode:/app/identity:ro
+      - /mnt/S8SA/storagenode:/app/config
+    environment:
+     - WALLET=${WALLET_ADDRESS}
+     - EMAIL=${STORJ_EMAIL}
+     - ADDRESS=${RPCADDRESS}:28967
+     - BANDWIDTH=80TB
+     - STORAGE=6TB
     ports:
-      - 4001:4001
+      - 28967:28967
+      - 14002:14002
     networks:
-      storj:
-        ipv4_address: 10.0.1.1
-
-  storj2:
-    image: madcatsu/storjshare-multi-daemon
-    mem_limit: 2g
-    container_name: storj2
-    hostname: storj2
-    restart: unless-stopped
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
-      - /mnt/S8SA/storj9:/data
-      - ${OPT}/storj/2:/config
-      - ${OPT}/storj/log:/logs
-      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
-    command: --create-user abc:1001:1001
-    env_file:
-     - ${STENV}
-    ports:
-      - 4002:4002
-#    dns: 1.1.1.1
-    networks:
-      storj:
-        ipv4_address: 10.0.1.2
-
-  storj3:
-    image: madcatsu/storjshare-multi-daemon
-    mem_limit: 2g
-    container_name: storj3
-    hostname: storj3
-    restart: unless-stopped
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
-      - /mnt/S2WM/storj10:/data
-      - ${OPT}/storj/3:/config
-      - ${OPT}/storj/log:/logs
-      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
-    command: --create-user abc:1001:1001
-    env_file:
-     - ${STENV}
-    ports:
-      - 4003:4003
-    networks:
-      storj:
-        ipv4_address: 10.0.1.3
-
-  storj4:
-    image: madcatsu/storjshare-multi-daemon
-    mem_limit: 2g
-    container_name: storj4
-    hostname: storj4
-    restart: unless-stopped
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
-      - /mnt/S3HB/storj14:/data
-      - ${OPT}/storj/4:/config
-      - ${OPT}/storj/log:/logs
-      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
-    command: --create-user abc:1001:1001
-    env_file:
-     - ${STENV}
-    ports:
-      - 4004:4004
-#    dns: 1.1.1.1
-    networks:
-      storj:
-        ipv4_address: 10.0.1.4
-
-  storj5:
-    image: madcatsu/storjshare-multi-daemon
-    mem_limit: 2g
-    container_name: storj5
-    hostname: storj5
-    restart: unless-stopped
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /dev/rtc:/dev/rtc:ro
-      - /mnt/S3HB/storj15:/data
-      - ${OPT}/storj/5:/config
-      - ${OPT}/storj/log:/logs
-      - ${OPT}/storj/daemon.js:/usr/lib/node_modules/storjshare-daemon/lib/config/daemon.js:ro
-      - ${OPT}/storj/chaperone.yaml:/etc/chaperone.d/chaperone.yaml
-    command: --create-user abc:1001:1001
-    env_file:
-     - ${STENV}
-    ports:
-      - 4005:4005
-#    dns: 1.1.1.1
-    networks:
-      storj:
-        ipv4_address: 10.0.1.5
-        
-
+      storjv3:
+        ipv4_address: 192.168.0.100
