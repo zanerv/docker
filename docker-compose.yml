@@ -7,13 +7,45 @@ networks:
   proxy-tier:
 
 services:
+  # code-server:
+  #   container_name: code-server
+  #   hostname: code-server
+  #   image: codercom/code-server
+  #   volumes:
+  #     - /opt:/home/coder/project
+  #     - ${OPT}/code:/home/coder/.local/share/code-server
+  #   environment:
+  #     - PASSWORD=${WEBPASSWORD}
+  #     # - LETSENCRYPT_HOST=code.${DOMAIN}
+  #     - VIRTUAL_HOST=code.${DOMAIN}
+  #   networks:
+  #     - proxy-tier
+      
+  firefly: 
+    container_name: firefly
+    hostname: firefly
+    image: jc5x/firefly-iii:alpha
+    depends_on:
+      - mariadb
+    env_file: .firefly
+    environment:
+      # - LETSENCRYPT_HOST=firefly.${DOMAIN}
+      - VIRTUAL_HOST=firefly.${DOMAIN}
+    volumes: 
+      - ${OPT}/firefly/export:/var/www/firefly-iii/storage/export
+      - ${OPT}/firefly/upload:/var/www/firefly-iii/storage/upload
+    restart: unless-stopped
+    networks:
+      - default
+      - proxy-tier
+
   bitwarden:
     image: bitwardenrs/server-mysql
     container_name: bitwarden
     hostname: bitwarden
     environment:
-      - LETSENCRYPT_HOST=x.${DOMAIN}
-      - VIRTUAL_HOST=x.${DOMAIN}
+      - LETSENCRYPT_HOST=pass.${DOMAIN}
+      - VIRTUAL_HOST=pass.${DOMAIN}
       - VIRTUAL_PORT=80
       - ENABLE_DB_WAL='false'
       - DATABASE_URL=mysql://bitwarden_rs:${MYSQL_PASSWORD}@mariadb/bitwarden_rs
