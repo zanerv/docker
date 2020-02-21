@@ -6,4 +6,3 @@ mem.lo*
 ssh.ip
 fail_over.sh 
 s.sh
-.firefly
