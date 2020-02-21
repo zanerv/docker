@@ -1,0 +1,10 @@
+.vscode/
+appdata/
+pfsense/
+dell/
+lsi/
+mem.lo*
+ssh.ip
+fail_over.sh 
+s.sh
+.firefly

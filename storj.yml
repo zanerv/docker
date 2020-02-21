@@ -1,0 +1,36 @@
+---
+version: '2'
+networks:
+  storjv3:
+    driver: macvlan
+    driver_opts:
+      parent: eno1
+    ipam:
+      config:
+       - subnet: 192.168.0.0/24
+         gateway: 192.168.0.1
+services:
+
+  storagenode:
+    image: storjlabs/storagenode:beta
+#    mem_limit: 2g
+    container_name: storagenode 
+    hostname: storagenode 
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/rtc:/dev/rtc:ro
+      - /opt/appdata/storj/identity/storagenode:/app/identity:ro
+      - /mnt/S8SA/storagenode:/app/config
+    environment:
+     - WALLET=${WALLET_ADDRESS}
+     - EMAIL=${STORJ_EMAIL}
+     - ADDRESS=${RPCADDRESS}:28967
+     - BANDWIDTH=80TB
+     - STORAGE=6TB
+    ports:
+      - 28967:28967
+      - 14002:14002
+    networks:
+      storjv3:
+        ipv4_address: 192.168.0.100
